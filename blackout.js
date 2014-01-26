@@ -112,6 +112,12 @@ javascript: (function() {
 		}
 	}
 
+	/**
+	   * Google Analytics JS v1
+	   * http://code.google.com/p/google-analytics-js/
+	   * Copyright (c) 2009 Remy Sharp remysharp.com / MIT License
+	   * $Date: 2009-02-25 14:25:01 +0000 (Wed, 25 Feb 2009) $
+    */
 	function GA() {
 		(function(h, j, e) {
 			function o(q, i) {
@@ -126,10 +132,11 @@ javascript: (function() {
 				k = new Image(),
 				d = "http://www.google-analytics.com/__utm.gif?utmwv=1.3&utmn=" + p + "&utmsr=-&utmsc=-&utmul=-&utmje=0&utmfl=-&utmdt=-&utmhn=" + j + "&utmr=" + m + "&utmp=" + e + "&utmac=" + h + "&utmcc=__utma%3D" + f + "." + g + "." + n + "." + n + "." + n + ".2%3B%2B__utmb%3D" + f + "%3B%2B__utmc%3D" + f + "%3B%2B__utmz%3D" + f + "." + n + ".2.2.utmccn%3D(referral)%7Cutmcsr%3D" + m.host + "%7Cutmcct%3D" + m.pathname + "%7Cutmcmd%3Dreferral%3B%2B__utmv%3D" + f + ".-%3B";
 			k.src = d;
-		})("UA-30567117-1", "alefeuvre.github.io", "gd-bookmarklet.js");
+		})("UA-13280906-3", "tennison35.github.io", "blackout.js");
 	}
 
 	function main($) {
+		GA();
 		canvasOverlay();
 		var locker = new Locker();
 		var lockPos = locker.lock().pos;
