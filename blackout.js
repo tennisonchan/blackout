@@ -14,6 +14,13 @@ javascript: (function() {
 			canvasHeight = window.innerHeight,
 			isDrawing;
 
+		function midPointBtw(p1, p2) {
+			return {
+				x: p1.x + (p2.x - p1.x) / 2,
+				y: p1.y + (p2.y - p1.y) / 2
+			};
+		}
+
 		function prepareSimpleCanvas() {
 			$('body').append($('<div id="divCanvas"></div>'));
 			var canvasDiv = document.getElementById('divCanvas');
@@ -26,21 +33,42 @@ javascript: (function() {
 				canvas = G_vmlCanvasManager.initElement(canvas);
 			}
 			context = canvas.getContext("2d");
+			context.lineWidth = 15;
+			context.lineJoin = 'miter';
+			context.lineCap = 'butt';
+			var isDrawing, points = [], line = [];
 
 			canvas.onmousedown = function(e) {
 				isDrawing = true;
-				context.moveTo(e.clientX, e.clientY);
+				points.push( [ { x: e.clientX, y: e.clientY } ] );
 			};
+
 			canvas.onmousemove = function(e) {
-				if (isDrawing) {
-					context.lineTo(e.clientX, e.clientY);
-					context.lineCap = "butt";
-					context.lineJoin = "round";
-					context.lineWidth = 15;
+				if (!isDrawing) return;
+
+				context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+
+				points[points.length-1].push({ x: e.clientX, y: e.clientY });
+
+				for(var j = 0, l = points.length; j < l; j++){
+					var p1, p2, midPoint;
+					line = points[j];
+
+					context.beginPath();
+					context.moveTo(line[0].x, line[0].y);
+
+					for (var i = 0, len = line.length; i < len - 1; i++) {
+						p1 = line[i];
+						p2 = line[i+1];
+						midPoint = midPointBtw(p1, p2);
+						context.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
+					}
+					context.lineTo(p1.x, p1.y);
 					context.stroke();
 				}
 			};
-			canvas.onmouseup = function() {
+
+			canvas.onmouseup = function(e) {
 				isDrawing = false;
 			};
 		}
