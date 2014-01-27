@@ -113,30 +113,43 @@ javascript: (function() {
 	}
 
 	/**
-	   * Google Analytics JS v1
-	   * http://code.google.com/p/google-analytics-js/
-	   * Copyright (c) 2009 Remy Sharp remysharp.com / MIT License
-	   * $Date: 2009-02-25 14:25:01 +0000 (Wed, 25 Feb 2009) $
-    */
-	function GA() {
-		(function(h, j, e) {
-			function o(q, i) {
-				return q + Math.floor(Math.random() * (i - q));
-			}
-			var l = 1000000000,
-				p = o(l, 9999999999),
-				f = o(10000000, 99999999),
-				g = o(l, 2147483647),
-				n = (new Date()).getTime(),
-				m = window.location,
-				k = new Image(),
-				d = "http://www.google-analytics.com/__utm.gif?utmwv=1.3&utmn=" + p + "&utmsr=-&utmsc=-&utmul=-&utmje=0&utmfl=-&utmdt=-&utmhn=" + j + "&utmr=" + m + "&utmp=" + e + "&utmac=" + h + "&utmcc=__utma%3D" + f + "." + g + "." + n + "." + n + "." + n + ".2%3B%2B__utmb%3D" + f + "%3B%2B__utmc%3D" + f + "%3B%2B__utmz%3D" + f + "." + n + ".2.2.utmccn%3D(referral)%7Cutmcsr%3D" + m.host + "%7Cutmcct%3D" + m.pathname + "%7Cutmcmd%3Dreferral%3B%2B__utmv%3D" + f + ".-%3B";
-			k.src = d;
+		* Google Analytics JS v1
+		* http://code.google.com/p/google-analytics-js/
+		* Copyright (c) 2009 Remy Sharp remysharp.com / MIT License
+		* $Date: 2009-02-25 14:25:01 +0000 (Wed, 25 Feb 2009) $
+	*/
+	function GoogleAnalytics() {
+		(function(urchinCode, domain, url) {
+
+		function rand(min, max) {
+			return min + Math.floor(Math.random() * (max - min));
+		}
+
+		var i=1000000000,
+			utmn=rand(i,9999999999),
+			cookie=rand(10000000,99999999),
+			random=rand(i,2147483647),
+			today=(new Date()).getTime(),
+			win = window.location,
+			img = new Image(),
+			urchinUrl = 'http://www.google-analytics.com/__utm.gif?utmwv=1.3&utmn='+
+				utmn+'&utmsr=-&utmsc=-&utmul=-&utmje=0&utmfl=-&utmdt=-&utmhn='+
+				domain+'&utmr='+win+'&utmp='+
+				url+'&utmac='+
+				urchinCode+'&utmcc=__utma%3D'+
+				cookie+'.'+random+'.'+today+'.'+today+'.'+
+				today+'.2%3B%2B__utmb%3D'+
+				cookie+'%3B%2B__utmc%3D'+
+				cookie+'%3B%2B__utmz%3D'+
+				cookie+'.'+today+
+				'.2.2.utmccn%3D(referral)%7Cutmcsr%3D' + win.host + '%7Cutmcct%3D' + win.pathname + '%7Cutmcmd%3Dreferral%3B%2B__utmv%3D'+
+				cookie+'.-%3B';
+
+		img.src = urchinUrl;
 		})("UA-13280906-3", "tennison35.github.io", "blackout.js");
 	}
 
 	function main($) {
-		GA();
 		canvasOverlay();
 		var locker = new Locker();
 		var lockPos = locker.lock().pos;
