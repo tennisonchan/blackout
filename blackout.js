@@ -15,7 +15,7 @@
             canvas.setAttribute('height', document.body.offsetHeight);
             canvas.setAttribute('resize', true);
             canvas.setAttribute('id', 'coveringCanvas');
-            $('body').append(canvasDiv);
+            $(bml.body).append(canvasDiv);
             canvasDiv.append(canvas);
             if (typeof G_vmlCanvasManager != 'undefined') {
                 canvas = G_vmlCanvasManager.initElement(canvas);
@@ -77,12 +77,12 @@
                 isDrawing = false;
             };
 
-            window.onresize = function() {
-                console.log('onresize');
+            // window.onresize = function() {
+            //     console.log('onresize');
 
-                canvas.width = document.body.offsetWidth;
-                canvas.height = document.body.offsetHeight;
-            };
+            //     canvas.width = document.body.offsetWidth;
+            //     canvas.height = document.body.offsetHeight;
+            // };
         },
 
         Screen = function() {
