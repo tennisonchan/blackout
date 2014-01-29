@@ -62,5 +62,5 @@ bookmarklet.app = function($){
 };
 
   if(!window.bookmarklet) bookmarklet.init();
-  else bookmarklet.toggle();
+  else window.bookmarklet.toggle();
 })(window, document);
