@@ -1,13 +1,10 @@
-javascript: (function() {
+(function($, bookmarklet) {
 
     var startBookmarklet = function($) {
 
         function init(){
             prepareSimpleCanvas();
-            var locker = new Locker();
-            var lockPos = locker.lock().pos;
             cssSetUP(cssList);
-            cssSetUP({ "#coveringCanvas": lockPos });
             window.blackoutIsBuilt = true;
         }
 
@@ -25,8 +22,9 @@ javascript: (function() {
             var isDrawing, points = [], line = [],
                 canvasDiv = $('<div id="divCanvas"></div>'),
                 canvas = document.createElement('canvas');
-            canvas.setAttribute('width', window.outerWidth);
-            canvas.setAttribute('height', window.outerHeight);
+            canvas.setAttribute('width', document.body.offsetWidth);
+            canvas.setAttribute('height', document.body.offsetHeight);
+            canvas.setAttribute('resize', true);
             canvas.setAttribute('id', 'coveringCanvas');
             $('body').append(canvasDiv);
             canvasDiv.append(canvas);
@@ -38,6 +36,8 @@ javascript: (function() {
             context.lineJoin = 'miter';
             context.lineCap = 'butt';
 
+            var screenCtr = new Screen();
+
             var midPointBtw = function (p1, p2) {
                 return {
                     x: p1.x + (p2.x - p1.x) / 2,
@@ -45,26 +45,35 @@ javascript: (function() {
                 };
             };
 
+            var styleUpdate = function(){
+                context = canvas.getContext("2d");
+                context.lineWidth = 15;
+                context.lineJoin = 'miter';
+                context.lineCap = 'butt';
+            };
+
             canvas.onmousedown = function(e) {
                 isDrawing = true;
-                points.push( [ { x: e.clientX, y: e.clientY } ] );
+                points.push( [ screenCtr.canvasPos(e) ] );
             };
 
             canvas.onmousemove = function(e) {
                 if (!isDrawing) return;
 
+                var j, l = points.length;
                 context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 
-                points[points.length-1].push({ x: e.clientX, y: e.clientY });
+                points[l-1].push( screenCtr.canvasPos(e) );
 
-                for(var j = 0, l = points.length; j < l; j++){
-                    var p1, p2, midPoint;
-                    line = points[j];
+                for(j = 0; j < l; j++){
+                    var p1, p2, midPoint, i,
+                    line = points[j],
+                    len = line.length;
 
                     context.beginPath();
                     context.moveTo(line[0].x, line[0].y);
 
-                    for (var i = 0, len = line.length; i < len - 1; i++) {
+                    for (i = 0; i < len - 1; i++) {
                         p1 = line[i];
                         p2 = line[i+1];
                         midPoint = midPointBtw(p1, p2);
@@ -78,31 +87,46 @@ javascript: (function() {
             canvas.onmouseup = function(e) {
                 isDrawing = false;
             };
+
+            window.onresize = function() {
+                console.log('onresize');
+
+                canvas.width = document.body.offsetWidth;
+                canvas.height = document.body.offsetHeight;
+            };
         },
 
-        Locker = function() {
-            var lockX, lockY;
+        Screen = function() {
+            var lockX, lockY,
 
-            function lockIt() {
-                window.scrollTo(lockX,lockY);
+            _scrollPos = function (xy) {
+                var scroll = {
+                    x: window.scrollX, y: window.scrollY
+                };
+                return xy? scroll[xy] : scroll;
+            },
+
+            _canvasPos = function(event, offSet) {
+                var offsetPos = _scrollPos();
+                return {
+                    x: event.clientX + offsetPos.x,
+                    y: event.clientY + offsetPos.y
+                };
+            },
+
+            _lockIt = function () {
+                window.scrollTo(_scrollPos("x"), _scrollPos("y"));
                 return false;
-            }
+            };
 
             return {
+                scrollPos: _scrollPos,
+                canvasPos: _canvasPos,
                 lock: function() {
-                    lockX = window.scrollX;
-                    lockY = window.scrollY;
-
-                    window.addEventListener("scroll", lockIt, false);
-                    return {
-                        pos: {
-                            left: lockX,
-                            top: lockY
-                        }
-                    };
+                    window.addEventListener("scroll", _lockIt, true);
                 },
                 unlock : function() {
-                    window.removeEventListener("scroll", lockIt, false);
+                    window.removeEventListener("scroll", _lockIt, false);
                 }
             };
         },
@@ -157,16 +181,6 @@ javascript: (function() {
 		})("UA-13280906-3", "tennison35.github.io", "blackout.js");
 	}
 
-	if (!window.jQuery) {
-		var head = document.getElementsByTagName("head")[0],
-			jQueryScript = document.createElement("script");
-		jQueryScript.type = "text/javascript";
-		jQueryScript.src = "http://code.jquery.com/jquery-1.10.2.min.js";
-		jQueryScript.onload = function() {
-			startBookmarklet(window.jQuery);
-		};
-		head.appendChild(jQueryScript);
-	} else {
-		startBookmarklet(window.jQuery);
-	}
-})();
+    startBookmarklet($);
+
+})(window.bookmarklet.jQuery, window.bookmarklet);
