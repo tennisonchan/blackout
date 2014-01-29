@@ -1,22 +1,11 @@
-(function($, bookmarklet) {
+(function($, bml) {
 
     var startBookmarklet = function($) {
 
         function init(){
             prepareSimpleCanvas();
-            cssSetUP(cssList);
             window.blackoutIsBuilt = true;
         }
-
-        var cssList = {
-            "#coveringCanvas": {
-                "position": "absolute",
-                "top": 0,
-                "left": 0,
-                "background-color": "rgba(255,255,255,.1)",
-                "z-index": 9999999
-            },
-        },
 
         prepareSimpleCanvas = function () {
             var isDrawing, points = [], line = [],

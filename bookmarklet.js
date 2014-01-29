@@ -8,7 +8,8 @@ bookmarklet.jQuery = null;
 
 bookmarklet.scripts = [
   { "el":"script", "attr": {"type": "text/javascript", "id": "bml-jquery", "src": "http://code.jquery.com/jquery-1.10.2.min.js"} },
-  { "el":"script", "attr": {"type": "text/javascript", "id": "bml-blackout", "src": "http://localhost/blackout/blackout.js"} }
+  { "el":"script", "attr": {"type": "text/javascript", "id": "bml-blackout", "src": "http://localhost/blackout/blackout.js"} },
+  { "el":"link", "attr": {"type": "text/css", "rel": "stylesheet", "id": "bml-css", "href": "http://localhost/blackout/blackout.css"} }
 ];
 
 bookmarklet.loadScript = function(opt, onload) {
@@ -59,6 +60,7 @@ bookmarklet.toggle = function(){
 
 bookmarklet.app = function($){
   bookmarklet.loadScript(bookmarklet.scripts[1]);
+  bookmarklet.loadScript(bookmarklet.scripts[2]);
 };
 
   if(!window.bookmarklet) bookmarklet.init();
