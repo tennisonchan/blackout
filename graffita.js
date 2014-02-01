@@ -8,7 +8,18 @@ var GreatWall = {
 
 		wall.init();
 		paint.init();
+
+		Panel();
 	}
+};
+
+var Panel = function() {
+	var menuDiv = $('<div/>', { id : 'menuContainer' });
+	$(bml.body).append(menuDiv);
+
+	menuDiv.append(template);
+
+	new window.gnMenu( document.getElementById( 'gn-menu' ) );
 };
 
 var Wall = function(id, context) {
