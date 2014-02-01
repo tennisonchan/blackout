@@ -16,9 +16,12 @@ var Wall = function(id, context) {
 	var canvasDiv = $('<div/>', { id : 'divCanvas' });
 	this.activeWall = null;
 	$(bml.body).append(canvasDiv);
+	var $all = $(document);
+	var width = $all.width();
+	var height = $all.height();
 
 	Wall.createCanvas = function(id){
-		var canvas = $("<canvas/>", { id: id, width: document.body.offsetWidth, height: document.body.offsetHeight, resize: true })
+		var canvas = $("<canvas/>", { id: id, width: width, height: height, resize: true })
 		canvasDiv.append(canvas);
 		return canvas;
 	},
