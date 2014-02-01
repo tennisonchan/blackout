@@ -54,11 +54,12 @@ var Paint = function(){
 	var path, textItem, tool, style;
 
 	var init = function(){
-
 		tool = new Tool();
-		tool.onMouseDown = thickBrush.onMouseDown;
-		tool.onMouseDrag = thickBrush.onMouseDrag;
-		tool.onMouseUp = thickBrush.onMouseUp;
+		tool.onMouseDown = bezierLine.onMouseDown;
+		tool.onMouseDrag = bezierLine.onMouseDrag;
+		tool.onMouseUp = bezierLine.onMouseUp;
+		tool.minDistance = 10;
+		// tool.maxDistance = 100;
 
 		style = new Style();
 	};
@@ -84,6 +85,54 @@ var Paint = function(){
 			}
 		}
 	}
+
+	var context, isDrawing, points = [], line = [];
+
+	var bezierLine = {
+		onMouseDown: function(event) {
+			console.log("bezierLine: onMouseDown");
+			var canvas = document.getElementById('coveringCanvas');
+			context = canvas.getContext("2d");
+			context.lineWidth = 15;
+			context.lineJoin = 'miter';
+			context.lineCap = 'butt';
+			context.strokeStyle = '#ff0000';
+
+			points.push( [ { x: event.event.offsetX, y: event.event.offsetY} ] );
+			console.log(event);
+		},
+		onMouseDrag: function(event) {
+			function midPointBtw(pt1, pt2){
+				return { x: (pt1.x+pt2.x)/2, y:(pt1.y+pt2.y)/2 };
+			}
+
+			context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+
+			points[points.length-1].push({ x: event.event.offsetX, y: event.event.offsetY });
+
+			for(var j = 0, l = points.length; j < l; j++){
+				var p1, p2, midPoint;
+				line = points[j];
+
+				context.beginPath();
+				context.moveTo(line[0].x, line[0].y);
+
+				for (var i = 0, len = line.length; i < len - 1; i++) {
+					p1 = line[i];
+					p2 = line[i+1];
+					midPoint = midPointBtw(p1, p2);
+					context.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
+				}
+				context.lineTo(p1.x, p1.y);
+				context.stroke();
+			}
+		},
+		onMouseUp: function(event) {
+			console.log("bezierLine: onMouseUp");
+			console.log("points:", points);
+		}
+	};
+
 
 	var simpleLine = {
 		onMouseDown: function(event) {
