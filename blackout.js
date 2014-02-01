@@ -1,22 +1,11 @@
-(function($, bookmarklet) {
+(function($, bml) {
 
     var startBookmarklet = function($) {
 
         function init(){
             prepareSimpleCanvas();
-            cssSetUP(cssList);
             window.blackoutIsBuilt = true;
         }
-
-        var cssList = {
-            "#coveringCanvas": {
-                "position": "absolute",
-                "top": 0,
-                "left": 0,
-                "background-color": "rgba(255,255,255,.1)",
-                "z-index": 9999999
-            },
-        },
 
         prepareSimpleCanvas = function () {
             var isDrawing, points = [], line = [],
@@ -26,7 +15,7 @@
             canvas.setAttribute('height', document.body.offsetHeight);
             canvas.setAttribute('resize', true);
             canvas.setAttribute('id', 'coveringCanvas');
-            $('body').append(canvasDiv);
+            $(bml.body).append(canvasDiv);
             canvasDiv.append(canvas);
             if (typeof G_vmlCanvasManager != 'undefined') {
                 canvas = G_vmlCanvasManager.initElement(canvas);
@@ -88,12 +77,12 @@
                 isDrawing = false;
             };
 
-            window.onresize = function() {
-                console.log('onresize');
+            // window.onresize = function() {
+            //     console.log('onresize');
 
-                canvas.width = document.body.offsetWidth;
-                canvas.height = document.body.offsetHeight;
-            };
+            //     canvas.width = document.body.offsetWidth;
+            //     canvas.height = document.body.offsetHeight;
+            // };
         },
 
         Screen = function() {
