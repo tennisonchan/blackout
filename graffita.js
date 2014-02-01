@@ -51,43 +51,107 @@ var Wall = function(id, context) {
 }
 
 var Paint = function(){
-	var path, textItem, tool;
+	var path, textItem, tool, style;
 
 	var init = function(){
-		textItem = new PointText(new Point(20, 30));
-		textItem.fillColor = 'black';
-		textItem.content = 'Click and drag to draw a line.';
-		
+
 		tool = new Tool();
-		tool.onMouseDown = onMouseDown;
-		tool.onMouseDrag = onMouseDrag;
-		tool.onMouseUp = onMouseUp;
+		tool.onMouseDown = thickBrush.onMouseDown;
+		tool.onMouseDrag = thickBrush.onMouseDrag;
+		tool.onMouseUp = thickBrush.onMouseUp;
+
+		style = new Style();
 	};
 
-	function onMouseDown(event) {
-		console.log("onMouseDown");
-
-		path = new Path();
-		path.strokeColor = 'black';
+	var Style = function(){
+		var style = {
+			strokeWidth: 10,
+			strokeCap: 'round',
+			strokeColor: 'black'
+			// strokeWidth: 10,
+			// strokeColor: '#ff0000'
+		};
+		return {
+			update: function(opt) {
+				console.log('style.update');
+				return $.extend(style, opt);
+			},
+			get: function(){
+				return style;
+			},
+			remove: function(){
+				path.style = null;
+			}
+		}
 	}
 
-	function onMouseDrag(event) {
-		console.log("onMouseDrag");
-		path.add(event.point);
-		
-		textItem.content = 'Segment count: ' + path.segments.length;
-	}
+	var simpleLine = {
+		onMouseDown: function(event) {
+			console.log("simpleLine: onMouseDown");
+			path = new Path();
 
-	function onMouseUp(event) {
-		console.log("onMouseUp");
+			path.style = style.get();
+			path.add(event.point);
+		},
+		onMouseDrag: function(event) {
+			console.log("simpleLine: onMouseDrag");
+			path.add(event.point);
+			path.smooth();
+		},
+		onMouseUp: function(event) {
+			console.log("simpleLine: onMouseUp");
+			console.log("path:", path);
+		}
+	};
 
-		path.simplify();
-		
-		console.log("path:", path);
-	}
+	var thickBrush = {
+		onMouseDown: function(event) {
+			tool.minDistance = 38;
+			tool.maxDistance = 40;
+			console.log("thickBrush: onMouseDown");
+
+			path = new Path();
+			path.fillColor = {
+				hue: Math.random() * 360,
+				saturation: 1,
+				brightness: 1,
+			};
+
+			path.add(event.point);
+		},
+		onMouseDrag: function(event) {
+			console.log("thickBrush: onMouseDrag");
+			var step = event.delta;
+			step.angle += 90;
+
+			var speed = step.length = 40;
+			var stepX = step.x/2;
+			var stepY = step.y/2;
+
+			var middlePoint = event.middlePoint;
+			var top = new Point(middlePoint.x + stepX, middlePoint.y + stepY);
+			var bottom = new Point(middlePoint.x - stepX, middlePoint.y - stepY);
+
+			path.add(top);
+			path.insert(0, bottom);
+			path.opacity = 0.5;
+			path.smooth();
+		},
+		onMouseUp: function(event) {
+			console.log("thickBrush: onMouseUp");
+
+			path.add(event.point);
+			path.closed = true;
+			path.smooth();
+
+			console.log("path:", path);
+		}
+	};
 
 	return {
-		init: init
+		init: init,
+		style: style,
+		tool: tool
 	};
 }
 
