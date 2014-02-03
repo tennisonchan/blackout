@@ -10,6 +10,8 @@ var GreatWall = {
 		paint.init();
 
 		Panel();
+
+		socketIO.init();
 	}
 };
 
@@ -48,7 +50,27 @@ var Wall = function(id, context) {
 	}
 
 	return Wall;
-}
+};
+
+var socketIO = {
+	init: function(){
+		console.log("socket.io", io);
+		socket = io.connect("http://neoglory.star.is", {port: 8000, transports: ["websocket"]});
+
+		socket.on("connect", this.onSocketConnected);
+		socket.on('error', this.onSocketError);
+	},
+	onSocketConnected: function (){
+		console.log("Connected to socket server");
+	},
+	onSocketError: function (err){
+		console.log( err === 'handshake error'? 'handshake error' : 'io error', err);
+	},
+	testing: function(){
+		socket.emit('testing', "testing msg from client");
+		socket.emit('broadcast', "broadcast testing msg from client");
+	}
+};
 
 var Paint = function(){
 	var path, textItem, tool, style;
