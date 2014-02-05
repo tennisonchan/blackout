@@ -1,5 +1,7 @@
 (function($, bml) {
 
+var canvas, ctx;
+
 var GreatWall = {
 	init: function(){
 		paper.install(window);
@@ -34,20 +36,21 @@ var Wall = function(id, context) {
 	var height = $all.height();
 
 	Wall.createCanvas = function(id){
-		var canvas = $("<canvas/>", { id: id, width: width, height: height, resize: true })
+		canvas = $("<canvas/>", { id: id, width: width, height: height, resize: true })[0];
 		canvasDiv.append(canvas);
+		ctx =  canvas.getContext('2d');
 		return canvas;
-	},
+	};
 
-	Wall.setupPaperScope = function($canvas){
+	Wall.setupPaperScope = function(canvas){
 		var newWall = new paper.PaperScope();
-		newWall.setup($canvas[0]);
+		newWall.setup(canvas);
 		Walls.push(newWall);
-	},
+	};
 
 	Wall.init = function() {
 		Wall.setupPaperScope( Wall.createCanvas('coveringCanvas') );
-	}
+	};
 
 	return Wall;
 };
@@ -58,19 +61,71 @@ var socketIO = {
 		socket = io.connect("http://neoglory.star.is", {port: 8000, transports: ["websocket"]});
 
 		socket.on("connect", this.onSocketConnected);
-		socket.on('error', this.onSocketError);
+		socket.on("error", this.onSocketError);
+
+		socket.on("onMouseDown", this.onSocketMouseDown);
+		socket.on("onMouseDrag", this.onSocketMouseDrag);
+		socket.on("onMouseUp", this.onSocketMouseUp);
 	},
 	onSocketConnected: function (){
 		console.log("Connected to socket server");
 	},
 	onSocketError: function (err){
-		console.log( err === 'handshake error'? 'handshake error' : 'io error', err);
+		console.log( err === "handshake error"? err : "io error", err);
+	},
+	onSocketMouseDown: function(data){
+		console.log('remote:onMouseDown');
+		bezierLine.onMouseDown.apply(null, data);
+	},
+	onSocketMouseDrag: function(data){
+		console.log('remote:onMouseDown');
+		bezierLine.onMouseDrag.apply(null, data);
+	},
+	onSocketMouseUp: function(data){
+		console.log('remote:onMouseDown');
+		bezierLine.onMouseUp.apply(null, data);
 	},
 	testing: function(){
-		socket.emit('testing', "testing msg from client");
-		socket.emit('broadcast', "broadcast testing msg from client");
+		socket.emit("testing", "testing msg from client");
+		socket.emit("broadcast", "broadcast testing msg from client");
 	}
 };
+
+var points = [];
+var point1, point2;
+var bezierLine = {
+	onMouseDown: function(event, remote) {
+		console.log("bezierLine: onMouseDown");
+		ctx.lineWidth = 15;
+		ctx.lineJoin = 'miter';
+		ctx.lineCap = 'butt';
+		ctx.strokeStyle = '#ff0000';
+
+		point1 = { x: event.event.offsetX, y: event.event.offsetY };
+		ctx.beginPath();
+		ctx.moveTo(point1.x, point1.y);
+		if(!remote) socket.emit("onMouseDown", [{event:{offsetX: point1.x, offsetY: point1.y}}, true]);
+	},
+	onMouseDrag: function(event, remote) {
+		point2 = { x: event.event.offsetX, y: event.event.offsetY };
+
+		function midPointBtw(pt1, pt2){
+			return { x: (pt1.x+pt2.x)/2, y:(pt1.y+pt2.y)/2 };
+		}
+		var midPoint = midPointBtw(point1, point2);
+		ctx.quadraticCurveTo(point1.x, point1.y, midPoint.x, midPoint.y);
+		ctx.stroke();
+
+		point1 = point2;
+		if(!remote) socket.emit("onMouseDrag", [{event:{offsetX:point2.x, offsetY: point2.y}}, true]);
+	},
+	onMouseUp: function(event, remote) {
+		console.log("bezierLine: onMouseUp");
+		ctx.closePath();
+		if(!remote) socket.emit("onMouseUp", [null, true]);
+	}
+};
+
 
 var Paint = function(){
 	var path, textItem, tool, style;
@@ -105,56 +160,8 @@ var Paint = function(){
 			remove: function(){
 				path.style = null;
 			}
-		}
-	}
-
-	var context, isDrawing, points = [], line = [];
-
-	var bezierLine = {
-		onMouseDown: function(event) {
-			console.log("bezierLine: onMouseDown");
-			var canvas = document.getElementById('coveringCanvas');
-			context = canvas.getContext("2d");
-			context.lineWidth = 15;
-			context.lineJoin = 'miter';
-			context.lineCap = 'butt';
-			context.strokeStyle = '#ff0000';
-
-			points.push( [ { x: event.event.offsetX, y: event.event.offsetY} ] );
-			console.log(event);
-		},
-		onMouseDrag: function(event) {
-			function midPointBtw(pt1, pt2){
-				return { x: (pt1.x+pt2.x)/2, y:(pt1.y+pt2.y)/2 };
-			}
-
-			context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-
-			points[points.length-1].push({ x: event.event.offsetX, y: event.event.offsetY });
-
-			for(var j = 0, l = points.length; j < l; j++){
-				var p1, p2, midPoint;
-				line = points[j];
-
-				context.beginPath();
-				context.moveTo(line[0].x, line[0].y);
-
-				for (var i = 0, len = line.length; i < len - 1; i++) {
-					p1 = line[i];
-					p2 = line[i+1];
-					midPoint = midPointBtw(p1, p2);
-					context.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
-				}
-				context.lineTo(p1.x, p1.y);
-				context.stroke();
-			}
-		},
-		onMouseUp: function(event) {
-			console.log("bezierLine: onMouseUp");
-			console.log("points:", points);
-		}
+		};
 	};
-
 
 	var simpleLine = {
 		onMouseDown: function(event) {
@@ -224,7 +231,7 @@ var Paint = function(){
 		style: style,
 		tool: tool
 	};
-}
+};
 
 GreatWall.init();
 
