@@ -14,6 +14,7 @@ bookmarklet.scripts = [
   { "el":"link", "attr": {"type": "text/css", "rel":"stylesheet", "id": "bml-graffita-css", "href": "http://neoglory.star.is/graffita/css/blackout.css"} },
   { "el":"link", "attr": {"type": "text/css", "rel":"stylesheet", "id": "bml-gnmenu-css", "href": "http://neoglory.star.is/graffita/css/gnmenu.css"} },
   { "el":"script", "attr": {"type": "text/javascript", "id": "bml-gnmenu-tmp", "src": "http://neoglory.star.is/graffita/gnmenu-template.js"} },
+  { "el":"script", "attr": {"type": "text/javascript", "id": "bml-gnmenu-tmp", "src": "http://neoglory.star.is/graffita/lib/dat.gui.min.js"} },
   { "el":"script", "attr": {"type": "text/javascript", "id": "bml-socket", "src": "http://cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.6/socket.io.min.js"} }
 ];
 
@@ -66,13 +67,15 @@ bookmarklet.app = function($){
   /*for(var i=1, l = bookmarklet.scripts.length;i < l;i++){*/
     bookmarklet.loadScript(bookmarklet.scripts[3], function(){
       bookmarklet.loadScript(bookmarklet.scripts[2], function(){
-        bookmarklet.loadScript(bookmarklet.scripts[1]);
+        bookmarklet.loadScript(bookmarklet.scripts[7], function(){
+          bookmarklet.loadScript(bookmarklet.scripts[1]);
+        });
       });
     });
     bookmarklet.loadScript(bookmarklet.scripts[4]);
     bookmarklet.loadScript(bookmarklet.scripts[5]);
     bookmarklet.loadScript(bookmarklet.scripts[6]);
-    bookmarklet.loadScript(bookmarklet.scripts[7]);
+    bookmarklet.loadScript(bookmarklet.scripts[8]);
   /*}*/
 };
 

@@ -1,19 +1,24 @@
 (function($, bml) {
 
-var canvas, ctx;
+var canvas, ctx, socketIsOn;
 
 var GreatWall = {
 	init: function(){
 		paper.install(window);
 		var wall = new Wall();
 		var paint = new Paint();
+		var gui = new dat.GUI();
 
 		wall.init();
 		paint.init();
 
-		Panel();
+		gui.add(ctx, 'lineWidth').min(5).max(20).step(1);
+		gui.add(ctx, 'lineJoin').options({ miter: 'miter', round: 'round', bevel: 'bevel' });
+		gui.add(ctx, 'lineCap').options({ butt: 'butt', round: 'round', square: 'square' });
+		gui.addColor(ctx, 'strokeStyle');
+		console.log(gui);
 
-		socketIO.init();
+		// socketIO.init();
 	}
 };
 
@@ -66,6 +71,7 @@ var socketIO = {
 		socket.on("onMouseDown", this.onSocketMouseDown);
 		socket.on("onMouseDrag", this.onSocketMouseDrag);
 		socket.on("onMouseUp", this.onSocketMouseUp);
+		socketIsOn = true;
 	},
 	onSocketConnected: function (){
 		console.log("Connected to socket server");
@@ -96,15 +102,15 @@ var point1, point2;
 var bezierLine = {
 	onMouseDown: function(event, remote) {
 		console.log("bezierLine: onMouseDown");
-		ctx.lineWidth = 15;
-		ctx.lineJoin = 'miter';
-		ctx.lineCap = 'butt';
-		ctx.strokeStyle = '#ff0000';
+		// ctx.lineWidth = 15;
+		// ctx.lineJoin = 'miter';
+		// ctx.lineCap = 'butt';
+		// ctx.strokeStyle = '#000000';
 
 		point1 = { x: event.event.offsetX, y: event.event.offsetY };
 		ctx.beginPath();
 		ctx.moveTo(point1.x, point1.y);
-		if(!remote) socket.emit("onMouseDown", [{event:{offsetX: point1.x, offsetY: point1.y}}, true]);
+		if(socketIsOn && !remote) socket.emit("onMouseDown", [{event:{offsetX: point1.x, offsetY: point1.y}}, true]);
 	},
 	onMouseDrag: function(event, remote) {
 		point2 = { x: event.event.offsetX, y: event.event.offsetY };
@@ -117,12 +123,12 @@ var bezierLine = {
 		ctx.stroke();
 
 		point1 = point2;
-		if(!remote) socket.emit("onMouseDrag", [{event:{offsetX:point2.x, offsetY: point2.y}}, true]);
+		if(socketIsOn && !remote) socket.emit("onMouseDrag", [{event:{offsetX:point2.x, offsetY: point2.y}}, true]);
 	},
 	onMouseUp: function(event, remote) {
 		console.log("bezierLine: onMouseUp");
 		ctx.closePath();
-		if(!remote) socket.emit("onMouseUp", [null, true]);
+		if(socketIsOn && !remote) socket.emit("onMouseUp", [null, true]);
 	}
 };
 
