@@ -97,6 +97,38 @@ var socketIO = {
 	}
 };
 
+var keys = [37, 38, 39, 40];
+
+function keydown(e) {
+    for (var i = keys.length; i--;) {
+        if (e.keyCode === keys[i]) {
+            preventDefault(e);
+            return;
+        }
+    }
+}
+
+function wheel(e) {
+	e = e || window.event;
+	if (e.preventDefault) e.preventDefault();
+	e.returnValue = false;
+}
+
+function disable_scroll() {
+  if (window.addEventListener) {
+      window.addEventListener('DOMMouseScroll', wheel, false);
+  }
+  window.onmousewheel = document.onmousewheel = wheel;
+  document.onkeydown = keydown;
+}
+
+function enable_scroll() {
+    if (window.removeEventListener) {
+        window.removeEventListener('DOMMouseScroll', wheel, false);
+    }
+    window.onmousewheel = document.onmousewheel = document.onkeydown = null;
+}
+
 var points = [];
 var point1, point2, tmpImageData;
 var bezierLine = {
@@ -111,6 +143,7 @@ var bezierLine = {
 		ctx.beginPath();
 		ctx.moveTo(point1.x, point1.y);
 		tmpImageData = ctx.getImageData(window.scrollX, window.scrollY, window.screen.width, window.screen.height);
+		disable_scroll();
 		if(socketIsOn && !remote) socket.emit("onMouseDown", [{event:{offsetX: point1.x, offsetY: point1.y}}, true]);
 	},
 	onMouseDrag: function(event, remote) {
@@ -121,7 +154,8 @@ var bezierLine = {
 		}
 
 		ctx.clearRect(window.scrollX, window.scrollY, window.screen.width, window.screen.height);
-		if(tmpImageData) ctx.putImageData(tmpImageData,window.scrollX, window.scrollY);
+		// ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+		if(tmpImageData) ctx.putImageData(tmpImageData, window.scrollX, window.scrollY);
 
 		var midPoint = midPointBtw(point1, point2);
 		ctx.quadraticCurveTo(point1.x, point1.y, midPoint.x, midPoint.y);
@@ -133,6 +167,7 @@ var bezierLine = {
 	onMouseUp: function(event, remote) {
 		console.log("bezierLine: onMouseUp");
 		ctx.closePath();
+		enable_scroll();
 		if(socketIsOn && !remote) socket.emit("onMouseUp", [null, true]);
 	}
 };
