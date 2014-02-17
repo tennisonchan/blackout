@@ -98,7 +98,7 @@ var socketIO = {
 };
 
 var points = [];
-var point1, point2;
+var point1, point2, tmpImageData;
 var bezierLine = {
 	onMouseDown: function(event, remote) {
 		console.log("bezierLine: onMouseDown");
@@ -118,6 +118,10 @@ var bezierLine = {
 		function midPointBtw(pt1, pt2){
 			return { x: (pt1.x+pt2.x)/2, y:(pt1.y+pt2.y)/2 };
 		}
+
+		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+		if(tmpImageData) ctx.putImageData(tmpImageData,0,0);
+
 		var midPoint = midPointBtw(point1, point2);
 		ctx.quadraticCurveTo(point1.x, point1.y, midPoint.x, midPoint.y);
 		ctx.stroke();
@@ -128,6 +132,7 @@ var bezierLine = {
 	onMouseUp: function(event, remote) {
 		console.log("bezierLine: onMouseUp");
 		ctx.closePath();
+		tmpImageData = ctx.getImageData(0,0,ctx.canvas.width,ctx.canvas.height);
 		if(socketIsOn && !remote) socket.emit("onMouseUp", [null, true]);
 	}
 };
