@@ -2,20 +2,22 @@ javascript: (function(w, d, j) {
 
 var bookmarklet = {};
 
-bookmarklet.name = "blackout";
+bookmarklet.name = "graffita";
 bookmarklet.anchor = null;
 bookmarklet.jQuery = null;
+bookmarklet.baseURL = "//neoglory.star.is/graffita/";
+bookmarklet.baseURL = "//127.0.0.1:8000/graffita/";
 
 bookmarklet.scripts = [
-  { "el":"script", "attr": {"type": "text/javascript", "id": "bml-jquery", "src": "http://code.jquery.com/jquery-1.10.2.min.js"} },
-  { "el":"script", "attr": {"type": "text/javascript", "id": "bml-graffita", "src": "http://neoglory.star.is/graffita/graffita.js"} },
-  { "el":"script", "attr": {"type": "text/javascript", "id": "bml-paperjs", "src": "http://neoglory.star.is/graffita/lib/paper.js"} },
-  { "el":"script", "attr": {"type": "text/javascript", "id": "bml-gnmenu", "src": "http://neoglory.star.is/graffita/gnmenu.js"} },
-  { "el":"link", "attr": {"type": "text/css", "rel":"stylesheet", "id": "bml-graffita-css", "href": "http://neoglory.star.is/graffita/css/blackout.css"} },
-  { "el":"link", "attr": {"type": "text/css", "rel":"stylesheet", "id": "bml-gnmenu-css", "href": "http://neoglory.star.is/graffita/css/gnmenu.css"} },
-  { "el":"script", "attr": {"type": "text/javascript", "id": "bml-gnmenu-tmp", "src": "http://neoglory.star.is/graffita/gnmenu-template.js"} },
-  { "el":"script", "attr": {"type": "text/javascript", "id": "bml-gnmenu-tmp", "src": "http://neoglory.star.is/graffita/lib/dat.gui.min.js"} },
-  { "el":"script", "attr": {"type": "text/javascript", "id": "bml-socket", "src": "http://cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.6/socket.io.min.js"} }
+  { "el":"script", "attr": {"type": "text/javascript", "id": "bml-jquery", "src": "//code.jquery.com/jquery-1.10.2.min.js"} },
+  { "el":"script", "attr": {"type": "text/javascript", "id": "bml-graffita", "src": bookmarklet.baseURL + "graffita.js"} },
+  { "el":"script", "attr": {"type": "text/javascript", "id": "bml-paperjs", "src": bookmarklet.baseURL + "lib/paper.js"} },
+  { "el":"script", "attr": {"type": "text/javascript", "id": "bml-gnmenu", "src": bookmarklet.baseURL + "gnmenu.js"} },
+  { "el":"link", "attr": {"type": "text/css", "rel":"stylesheet", "id": "bml-graffita-css", "href": bookmarklet.baseURL + "css/blackout.css"} },
+  { "el":"link", "attr": {"type": "text/css", "rel":"stylesheet", "id": "bml-gnmenu-css", "href": bookmarklet.baseURL + "css/gnmenu.css"} },
+  { "el":"script", "attr": {"type": "text/javascript", "id": "bml-gnmenu-tmp", "src": bookmarklet.baseURL + "gnmenu-template.js"} },
+  { "el":"script", "attr": {"type": "text/javascript", "id": "bml-gnmenu-tmp", "src": bookmarklet.baseURL + "lib/dat.gui.min.js"} },
+  { "el":"script", "attr": {"type": "text/javascript", "id": "bml-socket", "src": "//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.6/socket.io.min.js"} }
 ];
 
 bookmarklet.loadScript = function(opt, onload) {
