@@ -7,28 +7,21 @@ var GreatWall = {
 		paper.install(window);
 		var wall = new Wall();
 		var paint = new Paint();
-		var gui = new dat.GUI();
-
 		wall.init();
 		paint.init();
-
-		gui.add(ctx, 'lineWidth').min(5).max(20).step(1);
-		gui.add(ctx, 'lineJoin').options({ miter: 'miter', round: 'round', bevel: 'bevel' });
-		gui.add(ctx, 'lineCap').options({ butt: 'butt', round: 'round', square: 'square' });
-		gui.addColor(ctx, 'strokeStyle');
-		console.log(gui);
+		var panel = new Panel();
 
 		// socketIO.init();
 	}
 };
 
 var Panel = function() {
-	var menuDiv = $('<div/>', { id : 'menuContainer' });
-	$(bml.body).append(menuDiv);
+	var gui = new dat.GUI();
 
-	menuDiv.append(template);
-
-	new window.gnMenu( document.getElementById( 'gn-menu' ) );
+	gui.add(ctx, 'lineWidth').min(1).max(20).step(1);
+	gui.add(ctx, 'lineJoin').options({ miter: 'miter', round: 'round', bevel: 'bevel' });
+	gui.add(ctx, 'lineCap').options({ butt: 'butt', round: 'round', square: 'square' });
+	gui.addColor(ctx, 'strokeStyle');
 };
 
 var Wall = function(id, context) {
