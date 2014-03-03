@@ -1,6 +1,6 @@
 (function($, bml) {
 
-var canvas, ctx, socketIsOn;
+var canvas, ctx, socketIsOn, db;
 
 var GreatWall = {
 	init: function(){
@@ -11,9 +11,97 @@ var GreatWall = {
 		paint.init();
 		var panel = new Panel();
 
-		// socketIO.init();
+		db = new PouchDB('graffita');
+
+		// var graffita = new Graffita();
+		// graffita.socket.init();
+		// console.log(graffita);
+
+		// html2canvas(document.body, {
+		// 	onrendered: function(canvas) {
+		// 		// canvas is the actual canvas element,
+		// 		// to append it to the page call for example
+		// 		// document.body.appendChild( canvas );
+		// 		document.body.appendChild( canvas );
+		// 		console.log('DONE!');
+		// 	}
+		// });
 	}
 };
+
+function addImageData(data) {
+	var imageData = {
+		_id: new Date().toISOString(),
+		data: data,
+		completed: false
+	};
+	db.put(imageData, function callback(err, result) {
+		if (!err) {
+			console.log('Successfully posted a imageData!');
+		}
+	});
+}
+
+function SocketIO() {
+	this._config = {
+		url: "http://neoglory.star.is",
+		port: 8000,
+		transports: ["websocket"]
+	};
+
+	this._socket = null;
+	this._socketIsOn = false;
+
+	this.init = function(){
+		if(!io) return false;
+		var config = this._config;
+		console.log("socket.io", io);
+		this._socket = io.connect( config.url, { port: config.port, transports: config.transports });
+
+		this._socket.on("connect", this.onSocketConnected);
+		this._socket.on("error", this.onSocketError);
+
+		this._socket.on("onMouseDown", this.onSocketMouseDown);
+		this._socket.on("onMouseDrag", this.onSocketMouseDrag);
+		this._socket.on("onMouseUp", this.onSocketMouseUp);
+		this._socketIsOn = true;
+	};
+	this.onSocketConnected = function (){
+		console.log("Connected to socket server");
+	};
+	this.onSocketError = function (err){
+		console.log( err === "handshake error"? err : "io error", err);
+	};
+	this.onSocketMouseDown = function(data){
+		console.log('remote:onMouseDown');
+		// bezierLine.onMouseDown.apply(null, data);
+	};
+	this.onSocketMouseDrag = function(data){
+		console.log('remote:onMouseDown');
+		// bezierLine.onMouseDrag.apply(null, data);
+	};
+	this.onSocketMouseUp = function(data){
+		console.log('remote:onMouseDown');
+		// bezierLine.onMouseUp.apply(null, data);
+	};
+	this.testing = function(){
+		this._socket.emit("testing", "testing msg from client");
+		this._socket.emit("broadcast", "broadcast testing msg from client");
+	};
+}
+
+// function Tool() {
+
+// }
+
+function Storage() {
+
+}
+
+function Graffita() {
+	this.socket = new SocketIO(this);
+	this.tool = new Tool();
+}
 
 var Panel = function() {
 	var gui = new dat.GUI();
@@ -23,6 +111,35 @@ var Panel = function() {
 	gui.add(ctx, 'lineCap').options({ butt: 'butt', round: 'round', square: 'square' });
 	gui.addColor(ctx, 'strokeStyle');
 };
+
+function Uti () {
+	var w = window;
+	var l = w.location;
+	var href = l.href;
+	var uri_arr = decodeURI(href.split("?")[1]).split("&");
+	var uri = {
+		hash: l.hash,
+		protocol: l.protocol,
+		path: l.pathname,
+		host: l.host
+	};
+	for(var q = uri_arr.length-1;q >= 0;q--){
+		var item = uri_arr[q].split("=");
+		uri[item[0]] = item[1];
+	}
+	this._uri = uri;
+}
+
+Uti.prototype.uri = function(query, isEncoded){
+	if(typeof query === "string"){
+		return this._uri[query];
+	} else if(!query){
+		return this._uri;
+	}
+};
+
+var uti = new Uti();
+uti.uri();
 
 var Wall = function(id, context) {
 	var Walls = [], Wall = {};
@@ -51,43 +168,6 @@ var Wall = function(id, context) {
 	};
 
 	return Wall;
-};
-
-var socketIO = {
-	init: function(){
-		console.log("socket.io", io);
-		socket = io.connect("http://neoglory.star.is", {port: 8000, transports: ["websocket"]});
-
-		socket.on("connect", this.onSocketConnected);
-		socket.on("error", this.onSocketError);
-
-		socket.on("onMouseDown", this.onSocketMouseDown);
-		socket.on("onMouseDrag", this.onSocketMouseDrag);
-		socket.on("onMouseUp", this.onSocketMouseUp);
-		socketIsOn = true;
-	},
-	onSocketConnected: function (){
-		console.log("Connected to socket server");
-	},
-	onSocketError: function (err){
-		console.log( err === "handshake error"? err : "io error", err);
-	},
-	onSocketMouseDown: function(data){
-		console.log('remote:onMouseDown');
-		bezierLine.onMouseDown.apply(null, data);
-	},
-	onSocketMouseDrag: function(data){
-		console.log('remote:onMouseDown');
-		bezierLine.onMouseDrag.apply(null, data);
-	},
-	onSocketMouseUp: function(data){
-		console.log('remote:onMouseDown');
-		bezierLine.onMouseUp.apply(null, data);
-	},
-	testing: function(){
-		socket.emit("testing", "testing msg from client");
-		socket.emit("broadcast", "broadcast testing msg from client");
-	}
 };
 
 var keys = [37, 38, 39, 40];
@@ -122,24 +202,22 @@ function enable_scroll() {
     window.onmousewheel = document.onmousewheel = document.onkeydown = null;
 }
 
-var points = [];
-var point1, point2, tmpImageData;
+var point1, point2, tmpImageData, isDraw;
 var bezierLine = {
 	onMouseDown: function(event, remote) {
 		console.log("bezierLine: onMouseDown");
-		// ctx.lineWidth = 15;
-		// ctx.lineJoin = 'miter';
-		// ctx.lineCap = 'butt';
-		// ctx.strokeStyle = '#000000';
 
 		point1 = { x: event.event.offsetX, y: event.event.offsetY };
+
 		ctx.beginPath();
 		ctx.moveTo(point1.x, point1.y);
 		tmpImageData = ctx.getImageData(window.scrollX, window.scrollY, window.screen.width, window.screen.height);
 		disable_scroll();
+		isDraw = true;
 		if(socketIsOn && !remote) socket.emit("onMouseDown", [{event:{offsetX: point1.x, offsetY: point1.y}}, true]);
 	},
 	onMouseDrag: function(event, remote) {
+		if(!isDraw) return false;
 		point2 = { x: event.event.offsetX, y: event.event.offsetY };
 
 		function midPointBtw(pt1, pt2){
@@ -158,9 +236,13 @@ var bezierLine = {
 		if(socketIsOn && !remote) socket.emit("onMouseDrag", [{event:{offsetX:point2.x, offsetY: point2.y}}, true]);
 	},
 	onMouseUp: function(event, remote) {
+		if(!isDraw) return false;
+
 		console.log("bezierLine: onMouseUp");
 		ctx.closePath();
 		enable_scroll();
+		isDraw = false;
+		addImageData(tmpImageData);
 		if(socketIsOn && !remote) socket.emit("onMouseUp", [null, true]);
 	}
 };
